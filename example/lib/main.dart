@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -15,6 +17,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+
+  List<String> _scannedFiles = [];
 
   Future<List<Connector>> _fetchDevices = AirBrother.getNetworkDevices(5000);
 
@@ -46,30 +50,68 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _scanFiles(Connector connector) async {
+    List<String> outScannedPaths = [];
+    ScanParameters scanParams = ScanParameters();
+    scanParams.documentSize = MediaSize.A6;
+    JobState jobState = await connector.performScan(scanParams, outScannedPaths);
+    print ("JobState: $jobState");
+    print("Files Scanned: $outScannedPaths");
+
+    setState(() {
+      _scannedFiles = outScannedPaths;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    Widget body;
+
+    if (_scannedFiles.isNotEmpty) {
+      body = ListView.builder(
+          itemCount: _scannedFiles.length,
+          itemBuilder: (context ,index) {
+            return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _scannedFiles = [];
+                  });
+                },
+                child: Image.file(File(_scannedFiles[index])));
+          });
+    }
+    else {
+      body = FutureBuilder(
+        future: _fetchDevices,
+        builder: (context, snapshot) {
+          print("Snapshot ${snapshot.data}");
+          if (snapshot.hasData) {
+            List<Connector> connectors = snapshot.data;
+            return ListView.builder(
+                itemCount: connectors.length,
+                itemBuilder: (context ,index) {
+                  return ListTile(title: Text(connectors[index].getModelName()),
+                    subtitle: Text(connectors[index].getDescriptorIdentifier()),
+                    onTap: () {
+                      _scanFiles(connectors[index]);
+                    },);
+                });
+          }
+          else {
+            return Text("Searching for Devices");
+          }
+        },
+      );
+    }
+
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body:FutureBuilder(
-          future: _fetchDevices,
-          builder: (context, snapshot) {
-            print("Snapshot ${snapshot.data}");
-            if (snapshot.hasData) {
-              List<Connector> connectors = snapshot.data;
-              return ListView.builder(
-                  itemCount: connectors.length,
-                  itemBuilder: (context ,index) {
-                    return ListTile(title: Text(connectors[index].getModelName()), subtitle: Text(connectors[index].getDescriptorIdentifier()),);
-              });
-            }
-            else {
-              return Text("Searching for Devices");
-            }
-          },
-        ),
+        body: body,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             setState(() {

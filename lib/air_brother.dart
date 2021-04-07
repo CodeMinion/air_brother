@@ -19,13 +19,6 @@ class AirBrother {
 
     final List<dynamic> resultList =
         await _channel.invokeMethod("getNetworkDevices", params);
-    /*
-    List<Connector> foundDevices = [];
-    resultList.forEach((element) {
-      foundDevices.add(Connector.fromMap(element));
-    });
-
-     */
 
     List<Connector> foundDevices =
         resultList.map((dartDevice) => Connector.fromMap(dartDevice)).toList();
@@ -46,6 +39,7 @@ class AirBrother {
         resultList.map((dartDevice) => Connector.fromMap(dartDevice)).toList();
     return foundDevices;
   }
+
 }
 
 class Connector {
@@ -88,6 +82,24 @@ class Connector {
 
   bool isFaxSupported() {
     return false;
+  }
+
+  Future<JobState> performScan(ScanParameters scanParams, List<String> outScannedPaths) async {
+    var params = {
+      "connector": this.toMap(),
+      "scanParams": scanParams.toMap()
+    };
+
+    final Map<dynamic, dynamic> resultMap = await AirBrother._channel.invokeMethod("performScan", params);
+
+    JobState jobState = JobState.fromMap(resultMap["jobState"]);
+
+    List<dynamic> scannedPaths = resultMap["scannedPaths"];
+    scannedPaths.forEach((element) {
+      outScannedPaths.add(element);
+    });
+
+    return jobState;
   }
 
   static Connector fromMap(Map<dynamic, dynamic> map) {
@@ -134,7 +146,7 @@ class Function {
     return Print;
   }
 
-  static Function fromMap(Map<String, dynamic> map) {
+  static Function fromMap(Map<dynamic, dynamic> map) {
     String name = map["name"];
     return valueFromName(name);
   }
@@ -148,13 +160,49 @@ class ScanParameters {
   MediaSize documentSize;
   Duplex duplex;
   ColorProcessing colorType;
+  Resolution resolution;
+  ScanPaperSource paperSource;
+  bool autoDocumentSizeScan;
+  bool whitePageRemove;
+  bool groundColorCorrection;
+  ScanSpecialMode specialScanMode;
 
-  // TODO Continue with Scan Parameters
-  ScanParameters() {
-    documentSize = MediaSize.A4;
-    duplex = Duplex.Simplex;
-    colorType = ColorProcessing.FullColor;
+  ScanParameters(
+      {this.documentSize = MediaSize.A4,
+      this.duplex = Duplex.Simplex,
+      this.colorType = ColorProcessing.FullColor,
+      this.resolution = const Resolution(200, 200),
+      this.paperSource = ScanPaperSource.AUTO,
+      this.autoDocumentSizeScan = false,
+      this.whitePageRemove = false,
+      this.groundColorCorrection = false,
+      this.specialScanMode = ScanSpecialMode.NORMAL_SCAN});
 
+  Map<String, dynamic> toMap() {
+    return {
+      "documentSize": documentSize.toMap(),
+      "duplex": duplex.toMap(),
+      "colorType": colorType.toMap(),
+      "resolution": resolution.toMap(),
+      "paperSource": paperSource.toMap(),
+      "autoDocumentSizeScan": autoDocumentSizeScan,
+      "whitePageRemove": whitePageRemove,
+      "groundColorCorrection": groundColorCorrection,
+      "specialScanMode": specialScanMode.toMap()
+    };
+  }
+
+  static fromMap(Map<dynamic, dynamic> map) {
+    return ScanParameters(
+        documentSize: MediaSize.fromMap(map["documentSize"]),
+        duplex: Duplex.fromMap(map["duplex"]),
+        colorType: ColorProcessing.fromMap(map["colorType"]),
+        resolution: Resolution.fromMap(map["resolution"]),
+        paperSource: ScanPaperSource.fromMap(map["paperSource"]),
+        autoDocumentSizeScan: map["autoDocumentSizeScan"],
+        whitePageRemove: map["whitePageRemove"],
+        groundColorCorrection: map["groundColorCorrection"],
+        specialScanMode: ScanSpecialMode.fromMap(map["specialScanMode"]));
   }
 }
 
@@ -237,7 +285,7 @@ class MediaSize {
     return Undefined;
   }
 
-  static fromMap(Map<String, dynamic> map) {
+  static fromMap(Map<dynamic, dynamic> map) {
     String name = map["name"];
     return MediaSize.fromName(name);
   }
@@ -276,7 +324,7 @@ class Duplex {
     return Simplex;
   }
 
-  static Duplex fromMap(Map<String, dynamic> map) {
+  static Duplex fromMap(Map<dynamic, dynamic> map) {
     String name = map["name"];
     return Duplex.fromName(name);
   }
@@ -298,13 +346,9 @@ class ColorProcessing {
 
   static const BlackAndWhite = ColorProcessing._internal("BlackAndWhite");
   static const Grayscale = ColorProcessing._internal("Grayscale");
-      static const FullColor = ColorProcessing._internal("FullColor");
+  static const FullColor = ColorProcessing._internal("FullColor");
 
-  static final _values = [
-    BlackAndWhite,
-    Grayscale,
-    FullColor
-  ];
+  static final _values = [BlackAndWhite, Grayscale, FullColor];
 
   static ColorProcessing fromName(String name) {
     int var2 = _values.length;
@@ -319,9 +363,171 @@ class ColorProcessing {
     return FullColor;
   }
 
-  static ColorProcessing fromMap(Map<String, dynamic> map) {
+  static ColorProcessing fromMap(Map<dynamic, dynamic> map) {
     String name = map["name"];
     return ColorProcessing.fromName(name);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {"name": _name};
+  }
+
+  @override
+  String toString() {
+    return toMap().toString();
+  }
+}
+
+class Resolution {
+  final int width;
+  final int height;
+
+  const Resolution(this.width, this.height);
+
+  Map<String, dynamic> toMap() {
+    return {
+      "width": width,
+      "height": height,
+    };
+  }
+
+  static Resolution fromMap(Map<dynamic, dynamic> map) {
+    int width = map["width"];
+    int height = map["height"];
+    return Resolution(width, height);
+  }
+}
+
+class ScanPaperSource {
+  final int _value;
+
+  const ScanPaperSource._internal(this._value);
+
+  static const AUTO = ScanPaperSource._internal(0);
+  static const ADF = ScanPaperSource._internal(1);
+  static const FB = ScanPaperSource._internal(2);
+
+  static final _values = [AUTO, ADF, FB];
+
+  int toValue() {
+    return this._value;
+  }
+
+  static ScanPaperSource fromValue(int value) {
+    int var2 = _values.length;
+
+    for (int var3 = 0; var3 < var2; ++var3) {
+      ScanPaperSource d = _values[var3];
+      if (d.toValue() == value) {
+        return d;
+      }
+    }
+    return null;
+  }
+
+  static ScanPaperSource fromMap(Map<dynamic, dynamic> map) {
+    int value = map["value"];
+    return ScanPaperSource.fromValue(value);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {"value": _value};
+  }
+
+  @override
+  String toString() {
+    return toMap().toString();
+  }
+}
+
+class ScanSpecialMode {
+  final int _value;
+
+  const ScanSpecialMode._internal(this._value);
+
+  static const NORMAL_SCAN = ScanSpecialMode._internal(0);
+  static const EDGE_SCAN = ScanSpecialMode._internal(1);
+  static const ORIGINAL_SCAN = ScanSpecialMode._internal(2);
+  static const CORNER_SCAN = ScanSpecialMode._internal(3);
+  static const SKEW_ADJUST = ScanSpecialMode._internal(4);
+  static const OVER_SCAN = ScanSpecialMode._internal(5);
+  static const LABEL_SCAN_CIRCLE = ScanSpecialMode._internal(6);
+  static const LABEL_SCAN_SQUARE = ScanSpecialMode._internal(7);
+  static const COPYQUALITY_SCAN = ScanSpecialMode._internal(8);
+
+  static final _values = [
+    NORMAL_SCAN,
+    EDGE_SCAN,
+    ORIGINAL_SCAN,
+    CORNER_SCAN,
+    SKEW_ADJUST,
+    OVER_SCAN,
+    LABEL_SCAN_CIRCLE,
+    LABEL_SCAN_SQUARE,
+    COPYQUALITY_SCAN
+  ];
+
+  int toValue() {
+    return this._value;
+  }
+
+  static ScanSpecialMode fromValue(int v) {
+    int var2 = _values.length;
+
+    for (int var3 = 0; var3 < var2; ++var3) {
+      ScanSpecialMode d = _values[var3];
+      if (d.toValue() == v) {
+        return d;
+      }
+    }
+
+    return null;
+  }
+
+  static ScanSpecialMode fromMap(Map<dynamic, dynamic> map) {
+    int value = map["value"];
+    return ScanSpecialMode.fromValue(value);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {"value": _value};
+  }
+}
+
+class JobState {
+  final String _name;
+  const JobState._internal(this._name);
+
+ static const SuccessJob = JobState._internal("SuccessJob");
+ static const ErrorJob = JobState._internal("SuccessJob");
+ static const ErrorJobConnectionFailure = JobState._internal("SuccessJob");
+ static const ErrorJobParameterInvalid = JobState._internal("SuccessJob");
+ static const ErrorJobCancel = JobState._internal("SuccessJob");
+
+  static final _values = [
+    SuccessJob,
+    ErrorJob,
+    ErrorJobConnectionFailure,
+    ErrorJobParameterInvalid,
+    ErrorJobCancel
+  ];
+
+  static JobState fromName(String name) {
+    int var2 = _values.length;
+
+    for (int var3 = 0; var3 < var2; ++var3) {
+      JobState d = _values[var3];
+      if (d._name == name) {
+        return d;
+      }
+    }
+
+    return ErrorJob;
+  }
+
+  static JobState fromMap(Map<dynamic, dynamic> map) {
+    String name = map["name"];
+    return JobState.fromName(name);
   }
 
   Map<String, dynamic> toMap() {

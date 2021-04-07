@@ -27,6 +27,10 @@ object BrotherManager {
         mTrackedConnectors.remove(connector.getConnectorId())
     }
 
+    fun getConnector(connectorId:Int):IConnector? {
+        return mTrackedConnectors[connectorId];
+    }
+
     /**
      * Makes a permission request to get access to the usb device
      */

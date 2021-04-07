@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.NonNull
 import com.brother.sdk.BrotherAndroidLib
 import com.rouninlabs.air_brother.method.GetNetworkDevicesMethodCall
+import com.rouninlabs.air_brother.method.PerformScanMethodCall
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -35,6 +36,9 @@ class AirBrotherPlugin : FlutterPlugin, MethodCallHandler {
         }
         else if (call.method == GetNetworkDevicesMethodCall.METHOD_NAME) {
             GetNetworkDevicesMethodCall(context = mContext, call = call, result = result).execute()
+        }
+        else if (call.method == PerformScanMethodCall.METHOD_NAME) {
+            PerformScanMethodCall(context = mContext, call = call, result = result).execute()
         }
         else {
             result.notImplemented()
