@@ -63,6 +63,19 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _printFiles(Connector connector) async {
+    List<String> outScannedPaths = [];
+    PrintParameters printParams = PrintParameters();
+    printParams.paperSize = MediaSize.A6;
+    JobState jobState = await connector.performPrint(printParams, outScannedPaths);
+    print ("JobState: $jobState");
+    print("Files Scanned: $outScannedPaths");
+
+    setState(() {
+      _scannedFiles = outScannedPaths;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -94,7 +107,8 @@ class _MyAppState extends State<MyApp> {
                   return ListTile(title: Text(connectors[index].getModelName()),
                     subtitle: Text(connectors[index].getDescriptorIdentifier()),
                     onTap: () {
-                      _scanFiles(connectors[index]);
+                      //_scanFiles(connectors[index]);
+                      _printFiles(connectors[index]);
                     },);
                 });
           }
