@@ -10,6 +10,7 @@
 
 #import <BRScanKit/BRScanKit.h>
 #import "Method/GetNetworkDevicesMethodCall.h"
+#import "Method/PerformScanMethodCall.h"
 
 @implementation AirBrotherPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -28,6 +29,12 @@
         // Track the call so it doesn't get collected before we are done.
         _lastNetPrinterCall = [[GetNetworkDevicesMethodCall alloc] initWithCall:call result:result];
         [(GetNetworkDevicesMethodCall *)_lastNetPrinterCall execute];
+        
+    }
+    else if ([[PerformScanMethodCall METHOD_NAME] isEqualToString:call.method]) {
+        // Track the call so it doesn't get collected before we are done.
+        _lastScanCall = [[PerformScanMethodCall alloc] initWithCall:call result:result];
+        [(PerformScanMethodCall *)_lastScanCall execute];
         
     }
     else {

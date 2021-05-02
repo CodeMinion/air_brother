@@ -66,7 +66,7 @@ class _MyAppState extends State<MyApp> {
   void _printFiles(Connector connector) async {
     List<String> outScannedPaths = [];
     PrintParameters printParams = PrintParameters();
-    printParams.paperSize = MediaSize.A6;
+    printParams.paperSize = MediaSize.A4;
     JobState jobState = await connector.performPrint(printParams, outScannedPaths);
     print ("JobState: $jobState");
     print("Files Scanned: $outScannedPaths");
