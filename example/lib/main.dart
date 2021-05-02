@@ -66,7 +66,7 @@ class _MyAppState extends State<MyApp> {
   void _printFiles(Connector connector) async {
     List<String> outScannedPaths = [];
     PrintParameters printParams = PrintParameters();
-    printParams.paperSize = MediaSize.A6;
+    printParams.paperSize = MediaSize.A4;
     JobState jobState = await connector.performPrint(printParams, outScannedPaths);
     print ("JobState: $jobState");
     print("Files Scanned: $outScannedPaths");
@@ -95,27 +95,37 @@ class _MyAppState extends State<MyApp> {
           });
     }
     else {
-      body = FutureBuilder(
-        future: _fetchDevices,
-        builder: (context, snapshot) {
-          print("Snapshot ${snapshot.data}");
-          if (snapshot.hasData) {
-            List<Connector> connectors = snapshot.data;
-            return ListView.builder(
-                itemCount: connectors.length,
-                itemBuilder: (context ,index) {
-                  return ListTile(title: Text(connectors[index].getModelName()),
-                    subtitle: Text(connectors[index].getDescriptorIdentifier()),
-                    onTap: () {
-                      //_scanFiles(connectors[index]);
-                      _printFiles(connectors[index]);
-                    },);
-                });
-          }
-          else {
-            return Text("Searching for Devices");
-          }
-        },
+      body = Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FutureBuilder(
+          future: _fetchDevices,
+          builder: (context, snapshot) {
+            print("Snapshot ${snapshot.data}");
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Text("Searching for scanners in your network.");
+            }
+            if (snapshot.hasData) {
+              List<Connector> connectors = snapshot.data;
+
+              if (connectors.isEmpty) {
+                return Text("No Scanners Found");
+              }
+              return ListView.builder(
+                  itemCount: connectors.length,
+                  itemBuilder: (context ,index) {
+                    return ListTile(title: Text(connectors[index].getModelName()),
+                      subtitle: Text(connectors[index].getDescriptorIdentifier()),
+                      onTap: () {
+                        _scanFiles(connectors[index]);
+                        //_printFiles(connectors[index]);
+                      },);
+                  });
+            }
+            else {
+              return Text("Searching for Devices");
+            }
+          },
+        ),
       );
     }
 

@@ -519,10 +519,10 @@ class JobState {
   const JobState._internal(this._name);
 
   static const SuccessJob = JobState._internal("SuccessJob");
-  static const ErrorJob = JobState._internal("SuccessJob");
-  static const ErrorJobConnectionFailure = JobState._internal("SuccessJob");
-  static const ErrorJobParameterInvalid = JobState._internal("SuccessJob");
-  static const ErrorJobCancel = JobState._internal("SuccessJob");
+  static const ErrorJob = JobState._internal("ErrorJob");
+  static const ErrorJobConnectionFailure = JobState._internal("ErrorJobConnectionFailure");
+  static const ErrorJobParameterInvalid = JobState._internal("ErrorJobParameterInvalid");
+  static const ErrorJobCancel = JobState._internal("ErrorJobCancel");
 
   static final _values = [
     SuccessJob,
