@@ -19,6 +19,7 @@
 @property (strong, nonatomic) FlutterResult result;
 @property (class, nonatomic, assign, readonly) NSString * METHOD_NAME;
 
+@property (strong, nonatomic) BRScanDeviceBrowser * deviceBrowser;
 @property (strong, nonatomic) NSMutableArray<BRScanDevice *> * foundDevices;
 
 - (instancetype)initWithCall:(FlutterMethodCall *)call

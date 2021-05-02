@@ -30,29 +30,20 @@ static NSString * METHOD_NAME = @"getNetworkDevices";
 
 - (void)execute {
 
-    BRScanDeviceBrowser * deviceBrowser = [BRScanDeviceBrowser alloc];
-    [deviceBrowser setDelegate:self];
+    
+    _deviceBrowser = [BRScanDeviceBrowser alloc];
+    [_deviceBrowser setDelegate:self];
     // Start Search
-    [deviceBrowser search];
+    [_deviceBrowser search];
     
     
-    /*
+    NSNumber * timeout = self->_call.arguments[@"timeout"];
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0ul);
         dispatch_async(queue, ^{
-            //[self->_foundDevices count];
-            // Perform async operation
-            // Call your method/function here
-            // Example:
-            // NSString *result = [anObject calculateSomething];
-            NSNumber * timeout = self->_call.arguments[@"timeout"];
-            BRScanDeviceBrowser * deviceBrowser = [BRScanDeviceBrowser alloc];
-            deviceBrowser.delegate = self;
-            // Start Search
-            [deviceBrowser search];
             // Wait for timeout (Time interval is expected in seconds)
             [NSThread sleepForTimeInterval:[timeout intValue]/1000];
             // Stop search
-            [deviceBrowser stop];
+            [self->_deviceBrowser stop];
             // Map the found devices to connectors.
             NSMutableArray<NSDictionary<NSString *, NSObject*> *> * dartNetScanners = [NSMutableArray arrayWithCapacity:[self->_foundDevices count]];
             
@@ -66,16 +57,12 @@ static NSString * METHOD_NAME = @"getNetworkDevices";
                         self->_result(dartNetScanners);
                     });
              
-        
         });
-    */
-
+    
     
 }
 
 - (void)scanDeviceBrowser:(BRScanDeviceBrowser *)browser didFindDevice:(BRScanDevice *)device {
-    // TODO Add device to list
-    //[_foundDevices
     [_foundDevices addObject:device];
 }
 
