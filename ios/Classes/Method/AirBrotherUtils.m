@@ -71,20 +71,20 @@
     else if ([documentSizeName isEqualToString:@"iso_dl_110x220mm"]) {
         return BRScanJobOptionDocumentSizeAuto;
     }
-    else if ([documentSizeName isEqualToString:@"na_letter_8"]) {
+    else if ([documentSizeName isEqualToString:@"na_letter_8.5x11in"]) {
         return BRScanJobOptionDocumentSizeLetter;
     }
-    else if ([documentSizeName isEqualToString:@"na_legal_8"]) {
+    else if ([documentSizeName isEqualToString:@"na_legal_8.5x14in"]) {
         return BRScanJobOptionDocumentSizeLegal;
     }
     else if ([documentSizeName isEqualToString:@"na_ledger_11x17in"]) {
         return BRScanJobOptionDocumentSizeLedger;
     }
-    else if ([documentSizeName isEqualToString:@"na_index"]) {
+    else if ([documentSizeName isEqualToString:@"na_index-4x6_4x6in"]) {
         return BRScanJobOptionDocumentSizeAuto;
     }
     else if ([documentSizeName isEqualToString:@"na_5x7_5x7in"]) {
-        return BRScanJobOptionDocumentSizePhoto;
+        return BRScanJobOptionDocumentSizePhotoL;
     }
     else if ([documentSizeName isEqualToString:@"na_executive_7.25x10.5in"]) {
         return BRScanJobOptionDocumentSizeAuto;
@@ -99,7 +99,7 @@
         return BRScanJobOptionDocumentSizeAuto;
     }
     else if ([documentSizeName isEqualToString:@"oe_photo-l_3.5x5in"]) {
-        return BRScanJobOptionDocumentSizePhotoL;
+        return BRScanJobOptionDocumentSizePhoto;
     }
     else if ([documentSizeName isEqualToString:@"om_folio_210x330mm"]) {
         return BRScanJobOptionDocumentSizeAuto;

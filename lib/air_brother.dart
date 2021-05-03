@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AirBrother {
   static const MethodChannel _channel = const MethodChannel('air_brother');
@@ -85,10 +90,7 @@ class Connector {
 
   Future<JobState> performScan(
       ScanParameters scanParams, List<String> outScannedPaths) async {
-    var params = {
-      "connector": this.toMap(),
-      "scanParams": scanParams.toMap()
-    };
+    var params = {"connector": this.toMap(), "scanParams": scanParams.toMap()};
 
     final Map<dynamic, dynamic> resultMap =
         await AirBrother._channel.invokeMethod("performScan", params);
@@ -96,25 +98,137 @@ class Connector {
     JobState jobState = JobState.fromMap(resultMap["jobState"]);
 
     List<dynamic> scannedPaths = resultMap["scannedPaths"];
-    scannedPaths.forEach((element) {
-      outScannedPaths.add(element);
-    });
+
+    print("Scans Received ${scannedPaths}");
+
+    // The Brother iOS Lib does not currently support all the papers supported
+    // by the Android SDK.
+    // We'll handle those paper conversions on the Flutter side.
+    if (Platform.isIOS &&
+        !scanParams.autoDocumentSizeScan &&
+        (scanParams.documentSize == MediaSize.A4 ||
+            scanParams.documentSize == MediaSize.A5 ||
+            scanParams.documentSize == MediaSize.A6 ||
+            scanParams.documentSize == MediaSize.B4 ||
+            scanParams.documentSize == MediaSize.B5 ||
+            scanParams.documentSize == MediaSize.C5Envelope ||
+            scanParams.documentSize == MediaSize.DLEnvelope ||
+            scanParams.documentSize == MediaSize.Index4x6 ||
+            scanParams.documentSize == MediaSize.Executive ||
+            scanParams.documentSize == MediaSize.Hagaki ||
+            scanParams.documentSize == MediaSize.Folio ||
+            scanParams.documentSize == MediaSize.BusinessCardLandscape)) {
+
+      for (int i = 0; i < scannedPaths.length; i++) {
+        String scannedPath = scannedPaths[i];
+        MediaSize requestedMedia = scanParams.documentSize;
+        String croppedPath = await _getUpdatedSizePath(
+            path: scannedPath,
+            widthIn: requestedMedia._width,
+            heightIn: requestedMedia._height);
+        outScannedPaths.add(croppedPath);
+      }
+    }
+    else {
+      scannedPaths.forEach((element) {
+        outScannedPaths.add(element);
+      });
+    }
 
     return jobState;
   }
+
+  /// Crops the image to the specified width and height in inches
+  /// and returns a path for the new cropped image.
+  Future<String> _getUpdatedSizePath(
+      {@required String path,
+      double dpi = 300,
+      @required double widthIn,
+      @required double heightIn}) async {
+    // TODO Open path into ui.Image
+
+    ui.Image _scannedImage = await _loadImage(path);
+    print(
+        "Scanned Width: ${_scannedImage.width} Scanned Height:${_scannedImage.height}");
+
+    double expectedWidthPx = widthIn * dpi;
+    double expectedHeightPx = heightIn * dpi;
+
+    if (expectedHeightPx > _scannedImage.height) {
+      // If the document scanned is smaller than the max for the media size,
+      // clip to that bottom.
+      expectedHeightPx = _scannedImage.height.toDouble();
+    }
+
+    print(
+        "Desired Width: ${expectedWidthPx} - Desired Height: ${expectedHeightPx}");
+
+    ui.Rect srcRect = ui.Rect.fromLTRB(0, 0, expectedWidthPx, expectedHeightPx);
+    ui.Rect srcTestRect =
+        ui.Rect.fromLTRB(0, 0, expectedWidthPx / 5, expectedHeightPx / 5);
+
+    ui.PictureRecorder recorder = ui.PictureRecorder();
+    ui.Canvas canvas = ui.Canvas(recorder);
+    ui.Paint paint = new ui.Paint()..color = Colors.red;
+    ui.Paint rectPaint = new ui.Paint()..color = Colors.blue;
+
+    canvas.drawImageRect(_scannedImage, srcRect, srcRect, paint);
+    //canvas.drawRect(srcTestRect, rectPaint);
+
+    var picture = await recorder
+        .endRecording()
+        .toImage(expectedWidthPx.toInt(), expectedHeightPx.toInt());
+
+    Uint8List imageBytes =
+        (await picture.toByteData(format: ui.ImageByteFormat.png))
+            .buffer
+            .asUint8List();
+    // TODO Save to file
+
+    File originalFile = File(path);
+    originalFile.writeAsBytes(imageBytes);
+
+    return path;
+  }
+
+  Future<ui.Image> _loadImage(String filePath) async {
+    File imageFile = File(filePath);
+    final ByteData img = ByteData.view(imageFile.readAsBytesSync().buffer);
+    final Completer<ui.Image> completer = new Completer();
+    ui.decodeImageFromList(new Uint8List.view(img.buffer), (ui.Image img) {
+      return completer.complete(img);
+    });
+    return completer.future;
+  }
+
+  /*
+  Future<ui.Image> _testImageLoading(String filePath) async {
+    ImageStream loadedImageStream =
+        FileImage(File(filePath)).resolve(ImageConfiguration.empty);
+    final Completer<ui.Image> completer = new Completer();
+    loadedImageStream
+        .addListener(new ImageStreamListener((ImageInfo info, bool sync) {
+      completer.complete(info.image);
+    }));
+    return completer.future;
+  }
+
+   */
 
   Future<JobState> performPrint(
       PrintParameters printParams, List<String> pathsToPrint) async {
     var params = {
       "connector": this.toMap(),
       "filePaths": pathsToPrint,
-      "printParams": printParams.toMap()};
+      "printParams": printParams.toMap()
+    };
 
     if (!isPrintSupported()) {
       return JobState.ErrorJob;
     }
 
-    final Map<dynamic, dynamic> resultMap = await AirBrother._channel.invokeMethod("performPrint", params);
+    final Map<dynamic, dynamic> resultMap =
+        await AirBrother._channel.invokeMethod("performPrint", params);
 
     JobState jobState = JobState.fromMap(resultMap);
 
@@ -520,8 +634,10 @@ class JobState {
 
   static const SuccessJob = JobState._internal("SuccessJob");
   static const ErrorJob = JobState._internal("ErrorJob");
-  static const ErrorJobConnectionFailure = JobState._internal("ErrorJobConnectionFailure");
-  static const ErrorJobParameterInvalid = JobState._internal("ErrorJobParameterInvalid");
+  static const ErrorJobConnectionFailure =
+      JobState._internal("ErrorJobConnectionFailure");
+  static const ErrorJobParameterInvalid =
+      JobState._internal("ErrorJobParameterInvalid");
   static const ErrorJobCancel = JobState._internal("ErrorJobCancel");
 
   static final _values = [
