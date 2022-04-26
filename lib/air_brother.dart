@@ -141,10 +141,10 @@ class Connector {
   /// Crops the image to the specified width and height in inches
   /// and returns a path for the new cropped image.
   Future<String> _getUpdatedSizePath(
-      {@required String path,
+      {required String path,
       double dpi = 300,
-      @required double widthIn,
-      @required double heightIn}) async {
+      required double widthIn,
+      required double heightIn}) async {
     // TODO Open path into ui.Image
 
     ui.Image _scannedImage = await _loadImage(path);
@@ -181,7 +181,7 @@ class Connector {
 
     Uint8List imageBytes =
         (await picture.toByteData(format: ui.ImageByteFormat.png))
-            .buffer
+            !.buffer
             .asUint8List();
     // TODO Save to file
 
@@ -555,7 +555,7 @@ class ScanPaperSource {
         return d;
       }
     }
-    return null;
+    return AUTO;
   }
 
   static ScanPaperSource fromMap(Map<dynamic, dynamic> map) {
@@ -614,7 +614,7 @@ class ScanSpecialMode {
       }
     }
 
-    return null;
+    return NORMAL_SCAN;
   }
 
   static ScanSpecialMode fromMap(Map<dynamic, dynamic> map) {
@@ -940,7 +940,7 @@ class PrintMargin {
   const PrintMargin._internal(this._name);
 
   static const Normal = PrintMargin._internal("Normal");
-  static const Borderless = PrintMediaType._internal("Borderless");
+  static const Borderless = PrintMargin._internal("Borderless");
 
   static final _values = [Normal, Borderless];
 
