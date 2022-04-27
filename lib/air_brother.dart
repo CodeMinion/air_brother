@@ -262,24 +262,24 @@ class Connector {
   }
 }
 
-class Function {
+class ScannerFunction {
   final String _name;
 
-  const Function._internal(this._name);
+  const ScannerFunction._internal(this._name);
 
-  static const Print = Function._internal("Print");
-  static const Scan = Function._internal("Scan");
-  static const Fax = Function._internal("Fax");
-  static const Phoenix = Function._internal("Phoenix");
-  static const DeviceStatus = Function._internal("DeviceStatus");
+  static const Print = ScannerFunction._internal("Print");
+  static const Scan = ScannerFunction._internal("Scan");
+  static const Fax = ScannerFunction._internal("Fax");
+  static const Phoenix = ScannerFunction._internal("Phoenix");
+  static const DeviceStatus = ScannerFunction._internal("DeviceStatus");
 
   static final _values = [Print, Scan, Fax, Phoenix, DeviceStatus];
 
-  static Function valueFromName(String name) {
+  static ScannerFunction valueFromName(String name) {
     return Print;
   }
 
-  static Function fromMap(Map<dynamic, dynamic> map) {
+  static ScannerFunction fromMap(Map<dynamic, dynamic> map) {
     String name = map["name"];
     return valueFromName(name);
   }

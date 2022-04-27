@@ -1,16 +1,16 @@
 name: air_brother
 description: Flutter plugin for the Brother Mobile Scanner.
-version: 0.0.2
+version: 0.1.0
 repository: https://github.com/CodeMinion/air_brother
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.16.2 <3.0.0"
   flutter: ">=1.20.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  path_provider: ^2.0.1
+  path_provider: ^2.0.9
 
 dev_dependencies:
   flutter_test:

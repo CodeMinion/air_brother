@@ -99,13 +99,13 @@ class _MyAppState extends State<MyApp> {
         padding: const EdgeInsets.all(8.0),
         child: FutureBuilder(
           future: _fetchDevices,
-          builder: (context, snapshot) {
+          builder: (context, AsyncSnapshot<List<Connector>> snapshot) {
             print("Snapshot ${snapshot.data}");
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Text("Searching for scanners in your network.");
             }
             if (snapshot.hasData) {
-              List<Connector> connectors = snapshot.data;
+              List<Connector> connectors = snapshot.data!;
 
               if (connectors.isEmpty) {
                 return Text("No Scanners Found");
