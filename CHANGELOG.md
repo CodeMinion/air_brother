@@ -7,3 +7,6 @@
 ## 0.1.0
 - Updated dependencies.
 
+## 0.1.1
+- Fixed error when finding a scanner on Android.
+

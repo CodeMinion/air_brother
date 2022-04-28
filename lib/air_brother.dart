@@ -55,12 +55,12 @@ class Connector {
   final bool _isPrintSupported;
 
   const Connector._internal(
-      {@required id,
-      @required descriptorIdentifier,
-      @required modelName,
-      @required isFaxSupported,
-      @required isPrintSupported,
-      @required isScanSupported})
+      {required id,
+      required descriptorIdentifier,
+      required modelName,
+      required isFaxSupported,
+      required isPrintSupported,
+      required isScanSupported})
       : this._id = id,
         this._modelName = modelName,
         this._descriptorIdentifier = descriptorIdentifier,
