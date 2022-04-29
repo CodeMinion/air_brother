@@ -21,7 +21,7 @@ fun Pair<ConnectorDescriptor, IConnector>.toMap(): Map<String, Any> {
             "id" to second.getConnectorId(),
             "descriptorIdentifier" to first.descriptorIdentifier,
             "modelName" to first.modelName,
-            "isFaxSupported" to (second.device.fax != null),
+            "faxSupported" to (second.device.fax != null),
             "isPrintSupported" to (second.device.printer != null),
             "isScanSupported" to (second.device.scanner != null)
     )

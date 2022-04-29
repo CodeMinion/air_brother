@@ -240,7 +240,7 @@ class Connector {
         id: map["id"],
         descriptorIdentifier: map["descriptorIdentifier"],
         modelName: map["modelName"],
-        isFaxSupported: map["isFaxSupported"],
+        isFaxSupported: map["faxSupported"],
         isPrintSupported: map["isPrintSupported"],
         isScanSupported: map["isScanSupported"]);
   }

@@ -10,3 +10,5 @@
 ## 0.1.1
 - Fixed error when finding a scanner on Android.
 
+## 0.1.2
+- Fixed error when finding a scanner on iOS.
