@@ -12,3 +12,6 @@
 
 ## 0.1.2
 - Fixed error when finding a scanner on iOS.
+
+## 0.1.3
+- Improved Scanner discovery on Android.

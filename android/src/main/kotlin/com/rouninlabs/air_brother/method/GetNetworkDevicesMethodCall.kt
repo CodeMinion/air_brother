@@ -40,7 +40,8 @@ class GetNetworkDevicesMethodCall(val context: Context, val call: MethodCall, va
             broadcastAddresses.add(controller.broadcastAddress.hostAddress)
 
             val networkDiscovery = BrotherMFCNetworkConnectorDiscovery(broadcastAddresses);
-
+            var foundDevice: Boolean = false
+            var discoveryEnded = false
             networkDiscovery.startDiscover{ descriptor->
 
                 if (descriptor.support(ConnectorDescriptor.Function.Scan)
@@ -49,7 +50,7 @@ class GetNetworkDevicesMethodCall(val context: Context, val call: MethodCall, va
                     Log.e("Frank", "Found Device: ${(descriptor as ConnectorDescriptor).modelName}")
 
                     if (!foundDescriptors.contains(descriptor)) {
-
+                        foundDevice = true
                         val connector = descriptor.createConnector(
                         CountrySpec.fromISO_3166_1_Alpha2(
                                 context.getResources().getConfiguration().locale.getCountry()
@@ -60,7 +61,23 @@ class GetNetworkDevicesMethodCall(val context: Context, val call: MethodCall, va
                             BrotherManager.trackConnector(it)
                             Log.e("Frank", "Found Device: ${(descriptor as ConnectorDescriptor).modelName}")
                             foundDescriptors.add(descriptor)
+
+
                         }
+                    }
+                }
+
+                if (discoveryEnded) {
+                    val dartList: List<Map<String, Any>> = foundDevices.map {
+                        Log.e("Frank", "Sending ${it.toMap()}")
+                        it.toMap()
+                    }.toList()
+
+                    Log.e("Frank", "Sending ${dartList}")
+
+                    GlobalScope.launch(Dispatchers.Main) {
+                        // Set result Printer status.
+                        result.success(dartList)
                     }
                 }
             }
@@ -68,17 +85,24 @@ class GetNetworkDevicesMethodCall(val context: Context, val call: MethodCall, va
             delay(timeMillis = timeout)
 
             networkDiscovery.stopDiscover()
+            discoveryEnded = true
 
-            val dartList:List<Map<String, Any>> = foundDevices.map {
-                Log.e("Frank", "Sending ${it.toMap()}")
-                it.toMap() }.toList()
+            /*
+            if (!foundDevice) {
+                val dartList: List<Map<String, Any>> = foundDevices.map {
+                    Log.e("Frank", "Sending ${it.toMap()}")
+                    it.toMap()
+                }.toList()
 
-            Log.e("Frank", "Sending ${dartList}")
+                Log.e("Frank", "Sending ${dartList}")
 
-            withContext(Dispatchers.Main) {
-                // Set result Printer status.
-                result.success(dartList)
+                withContext(Dispatchers.Main) {
+                    // Set result Printer status.
+                    result.success(dartList)
+                }
             }
+
+             */
         }
     }
 }

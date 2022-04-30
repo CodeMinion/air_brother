@@ -41,16 +41,16 @@ fun connectorFromMap(map: Map<String, Any>): IConnector? {
 
 
 fun scanParamsFromMap(map: Map<String, Any>): ScanParameters {
-    return ScanParameters().apply {
-        documentSize = mediaSizeFromMap(map["documentSize"] as Map<String, Any>)
-        duplex = duplexFromMap(map["duplex"] as Map<String, Any>)
-        colorType = colorProcessingFromMap(map["colorType"] as Map<String, Any>)
-        resolution = resolutionFromMap(map["resolution"] as Map<String, Any>)
-        paperSource = scanPaperSourceFromMap(map["paperSource"] as Map<String, Any>)
-        autoDocumentSizeScan = map["autoDocumentSizeScan"] as Boolean
-        whitePageRemove = map["whitePageRemove"] as Boolean
-        groundColorCorrection = map["groundColorCorrection"] as Boolean
-        specialScanMode = scanSpecialModeFromMap(map["specialScanMode"] as Map<String, Any>)
+    return ScanParameters().also {
+        it.documentSize = mediaSizeFromMap(map["documentSize"] as Map<String, Any>)
+        it.duplex = duplexFromMap(map["duplex"] as Map<String, Any>)
+        it.colorType = colorProcessingFromMap(map["colorType"] as Map<String, Any>)
+        it.resolution = resolutionFromMap(map["resolution"] as Map<String, Any>)
+        it.paperSource = scanPaperSourceFromMap(map["paperSource"] as Map<String, Any>)
+        it.autoDocumentSizeScan = map["autoDocumentSizeScan"] as Boolean
+        it.whitePageRemove = map["whitePageRemove"] as Boolean
+        it.groundColorCorrection = map["groundColorCorrection"] as Boolean
+        it.specialScanMode = scanSpecialModeFromMap(map["specialScanMode"] as Map<String, Any>)
     }
 }
 
