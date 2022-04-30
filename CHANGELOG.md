@@ -15,3 +15,6 @@
 
 ## 0.1.3
 - Improved Scanner discovery on Android.
+
+## 0.1.4
+- Updated Scanner discovery on Android to wait until at least one scanner is found.

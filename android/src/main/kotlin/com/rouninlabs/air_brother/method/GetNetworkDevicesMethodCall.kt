@@ -48,9 +48,9 @@ class GetNetworkDevicesMethodCall(val context: Context, val call: MethodCall, va
                         || descriptor.support(ConnectorDescriptor.Function.Print)) {
 
                     Log.e("Frank", "Found Device: ${(descriptor as ConnectorDescriptor).modelName}")
+                    foundDevice = true
 
                     if (!foundDescriptors.contains(descriptor)) {
-                        foundDevice = true
                         val connector = descriptor.createConnector(
                         CountrySpec.fromISO_3166_1_Alpha2(
                                 context.getResources().getConfiguration().locale.getCountry()
@@ -67,7 +67,9 @@ class GetNetworkDevicesMethodCall(val context: Context, val call: MethodCall, va
                     }
                 }
 
+                // Note: This will wait until a scanner is discovered even after a timeout.
                 if (discoveryEnded) {
+                    networkDiscovery.stopDiscover()
                     val dartList: List<Map<String, Any>> = foundDevices.map {
                         Log.e("Frank", "Sending ${it.toMap()}")
                         it.toMap()
@@ -84,8 +86,9 @@ class GetNetworkDevicesMethodCall(val context: Context, val call: MethodCall, va
 
             delay(timeMillis = timeout)
 
-            networkDiscovery.stopDiscover()
+            //networkDiscovery.stopDiscover()
             discoveryEnded = true
+
 
             /*
             if (!foundDevice) {
